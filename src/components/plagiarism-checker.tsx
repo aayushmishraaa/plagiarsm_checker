@@ -24,12 +24,12 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { analyzeText } from '@/app/actions';
 import type { DetectPlagiarismOutput } from '@/ai/flows/detect-plagiarism';
+import { ScrollArea } from './ui/scroll-area';
 
 const formSchema = z.object({
   text: z.string().min(50, {
@@ -73,13 +73,31 @@ export function PlagiarismChecker() {
   const handleDownload = () => {
     if (!result) return;
 
-    const reportContent = `Veritas AI Plagiarism Report
+    let reportContent = `Veritas AI Plagiarism Report
 ==============================
-Confidence Score: ${(result.confidence * 100).toFixed(0)}%
+Plagiarism Score: ${result.plagiarismScore.toFixed(0)}%
+Uniqueness Score: ${result.uniquenessScore.toFixed(0)}%
 ------------------------------
 Analysis:
 ${result.analysis}
 `;
+
+    if (result.matches && result.matches.length > 0) {
+      reportContent += `
+------------------------------
+Potential Matches:
+`;
+      result.matches.forEach((match, index) => {
+        reportContent += `
+Match ${index + 1}:
+Text: "${match.text}"
+Source: ${match.source}
+Similarity: ${match.similarity.toFixed(0)}%
+`;
+      });
+    }
+
+
     const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -158,23 +176,51 @@ ${result.analysis}
             <Card className="shadow-lg animate-in fade-in">
               <CardHeader>
                 <CardTitle className="font-headline">Analysis Results</CardTitle>
-                <CardDescription>Review the analysis below. The confidence score indicates the likelihood of plagiarism.</CardDescription>
+                <CardDescription>Review the analysis below. The scores indicate the likelihood of plagiarism and content uniqueness.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                    <div className="flex justify-between items-center mb-2">
-                         <h3 className="text-sm font-medium">Plagiarism Confidence</h3>
-                         <span className="font-bold text-primary">{(result.confidence * 100).toFixed(0)}%</span>
+                <div className="grid grid-cols-2 gap-4 text-center">
+                    <div className="p-4 rounded-lg bg-secondary/50">
+                        <h3 className="text-sm font-medium text-muted-foreground">Plagiarism Score</h3>
+                        <p className="text-3xl font-bold text-primary">{result.plagiarismScore.toFixed(0)}%</p>
                     </div>
-                    <Progress value={result.confidence * 100} className="h-3 [&>div]:bg-primary" />
+                    <div className="p-4 rounded-lg bg-secondary/50">
+                        <h3 className="text-sm font-medium text-muted-foreground">Uniqueness Score</h3>
+                        <p className="text-3xl font-bold text-accent">{result.uniquenessScore.toFixed(0)}%</p>
+                    </div>
                 </div>
+                
                 <Separator />
+                
                 <div>
                     <h3 className="text-sm font-medium mb-2">Detailed Analysis</h3>
-                    <div className="p-4 bg-secondary/50 rounded-md max-h-[250px] overflow-y-auto text-sm whitespace-pre-wrap font-mono">
+                    <div className="p-4 bg-secondary/50 rounded-md max-h-[150px] overflow-y-auto text-sm whitespace-pre-wrap font-mono">
                         {result.analysis}
                     </div>
                 </div>
+
+                {result.matches && result.matches.length > 0 && (
+                    <div>
+                        <h3 className="text-sm font-medium mb-2">Potential Matches Found</h3>
+                        <ScrollArea className="border rounded-md h-[200px]">
+                            <div className="p-4 space-y-4">
+                                {result.matches.map((match, index) => (
+                                <div key={index} className="text-sm">
+                                    <blockquote className="border-l-2 border-primary pl-3 italic text-muted-foreground mb-2">
+                                    "{match.text}"
+                                    </blockquote>
+                                    <div className="flex justify-between items-center gap-4">
+                                        <a href={match.source} target="_blank" rel="noopener noreferrer" className="text-primary text-xs hover:underline truncate">
+                                            {match.source}
+                                        </a>
+                                        <span className="font-bold text-primary text-xs whitespace-nowrap">{match.similarity.toFixed(0)}% Match</span>
+                                    </div>
+                                </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                    </div>
+                )}
               </CardContent>
               <CardFooter>
                 <Button onClick={handleDownload} variant="outline">
