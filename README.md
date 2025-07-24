@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Veritas AI
 
 Veritas AI is an AI-powered plagiarism detection tool that analyzes text and highlights potential instances of plagiarism.
@@ -61,4 +61,4 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 [MIT License](https://opensource.org/licenses/MIT)
 =======
 
->>>>>>> origin/master
+
