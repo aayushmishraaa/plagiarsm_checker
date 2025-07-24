@@ -73,7 +73,7 @@ export function PlagiarismChecker() {
   const handleDownload = () => {
     if (!result) return;
 
-    let reportContent = `Veritas AI Plagiarism Report
+    let reportContent = `EchoScan Plagiarism Report
 ==============================
 Plagiarism Score: ${result.plagiarismScore.toFixed(0)}%
 Uniqueness Score: ${result.uniquenessScore.toFixed(0)}%
@@ -102,7 +102,7 @@ Similarity: ${match.similarity.toFixed(0)}%
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'veritas-ai-report.txt';
+    link.download = 'echoscan-report.txt';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

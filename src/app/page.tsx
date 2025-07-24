@@ -7,7 +7,7 @@ export default function Home() {
       <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center">
           <FileCheck2 className="h-6 w-6 mr-2 text-primary" />
-          <h1 className="text-2xl font-bold text-primary font-headline">Veritas AI</h1>
+          <h1 className="text-2xl font-bold text-primary font-headline">EchoScan</h1>
         </div>
       </header>
       <main className="flex-1">
